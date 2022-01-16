@@ -165,8 +165,7 @@ in an uncaught `CompletionException` being thrown from `HttpRestApi#processReque
 ### Choosing an Implementation
 For smaller scale applications which rely on blocking technologies such as JDBC, `restj-sun-http-server`
 can be used. It uses Sun's HTTP server library which is included within most JDK distributions.
-Alternatively, `restj-undertow` can be used alongside a worker thread pool, but this can be more trouble
-than it is worth.
+Alternatively, `restj-undertow` can be used alongside a blocking worker thread pool.
 
 For larger scale applications with thousands of simultaneous requests using an async implementation 
 like `restj-undertow` might be preferred. 
