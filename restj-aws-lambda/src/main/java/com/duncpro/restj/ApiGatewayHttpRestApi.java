@@ -1,27 +1,30 @@
 package com.duncpro.restj;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.duncpro.jrest.HttpRequest;
 import com.duncpro.jrest.HttpRestApi;
-import com.duncpro.jrest.HttpRestApiModule;
 import com.duncpro.jrest.util.ByteArrayPublisher;
 import com.duncpro.jrest.util.ConsolidatingByteArraySubscriber;
 import com.duncpro.jroute.HttpMethod;
 import com.duncpro.jroute.Path;
-import com.google.inject.Injector;
 
+import javax.inject.Inject;
 import java.util.Base64;
 import java.util.Optional;
 import java.util.concurrent.Flow;
 
 import static java.util.Objects.requireNonNull;
 
-public abstract class RestJLambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ApiGatewayHttpRestApi {
+    private final HttpRestApi restApi;
 
-    private Optional<byte[]> readRequestBody(APIGatewayProxyRequestEvent apiGatewayRequest) {
+    @Inject
+    public ApiGatewayHttpRestApi(HttpRestApi restApi) {
+        this.restApi = requireNonNull(restApi);
+    }
+
+    private static Optional<byte[]> readRequestBody(APIGatewayProxyRequestEvent apiGatewayRequest) {
         if (apiGatewayRequest.getBody() == null) return Optional.empty();
         if (apiGatewayRequest.getIsBase64Encoded()) {
             return Optional.of(Base64.getDecoder().decode(apiGatewayRequest.getBody()));
@@ -30,11 +33,7 @@ public abstract class RestJLambdaHandler implements RequestHandler<APIGatewayPro
         }
     }
 
-    @Override
-    public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent apiGatewayRequest, Context context) {
-        final var injector = createApplicationInjector().createChildInjector(new HttpRestApiModule());
-        final var restApi = injector.getInstance(HttpRestApi.class);
-
+    public APIGatewayProxyResponseEvent processRequest(APIGatewayProxyRequestEvent apiGatewayRequest) {
         Optional<Flow.Publisher<byte[]>> requestBodyPublisher = readRequestBody(apiGatewayRequest)
                 .map(ByteArrayPublisher::new);
 
@@ -61,6 +60,4 @@ public abstract class RestJLambdaHandler implements RequestHandler<APIGatewayPro
 
         return apiGatewayResponse;
     }
-
-    public abstract Injector createApplicationInjector();
 }
