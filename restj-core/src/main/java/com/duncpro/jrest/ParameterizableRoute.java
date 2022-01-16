@@ -6,6 +6,7 @@ import com.duncpro.jroute.Path;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class ParameterizableRoute {
@@ -19,11 +20,11 @@ public class ParameterizableRoute {
 
     public Route getAbstractRoute() { return this.abstractRoute; }
 
-    public String getVariableElementValue(Path path, String pathParam) {
+    public Optional<String> getVariableElementValue(Path path, String pathParam) {
         final var parameterPosition = parameters.indexOf(pathParam);
-        if (parameterPosition == -1) throw new IllegalArgumentException();
+        if (parameterPosition == -1) return Optional.empty();
         final var elementPosition = getVariableElementIndexes().get(parameterPosition);
-        return path.getElements().get(elementPosition);
+        return Optional.of(path.getElements().get(elementPosition));
     }
 
     private List<Integer> getVariableElementIndexes() {

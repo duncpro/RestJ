@@ -139,17 +139,19 @@ class DeclarativeHttpEndpoint {
     private CompletableFuture<Object> invokeHandlerMethod(HandlerInvocationContext context) {
         final var isAsyncEndpointMethod = CompletableFuture.class.isAssignableFrom(method.getReturnType());
 
-            // No error wrapping here on purpose. Async endpoints should return exceptional futures instead of
-            // throwing exceptions. Any uncaught exceptions WILL crash the server. Perhaps this behavior should
-            // be changed if in Stage.PRODUCTION?
-            if (isAsyncEndpointMethod) {
-                try {
-                    //noinspection unchecked
-                    return (CompletableFuture<Object>) method.invoke(context.declaringClassInstance, context.methodArguments.toArray());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    return failedFuture(e);
-                }
+        method.trySetAccessible();
+
+        // No error wrapping here on purpose. Async endpoints should return exceptional futures instead of
+        // throwing exceptions. Any uncaught exceptions WILL crash the server. Perhaps this behavior should
+        // be changed if in Stage.PRODUCTION?
+        if (isAsyncEndpointMethod) {
+            try {
+                //noinspection unchecked
+                return (CompletableFuture<Object>) method.invoke(context.declaringClassInstance, context.methodArguments.toArray());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                return failedFuture(e);
             }
+        }
 
         try {
             return completedFuture(method.invoke(context.declaringClassInstance, context.methodArguments.toArray()));

@@ -65,29 +65,35 @@ class CustomInjectionPoint {
 
             final Optional<String> serializedValue = request.getQueryArgument(queryAnnotation.value());
             if (serializedValue.isEmpty() && !isOptional) return failedFuture(new BadRequestException());
-            return completedFuture(integrator.deserializeQueryArgument(getType(), serializedValue.orElse(null)));
+            final var deserializedValue = serializedValue.map(v -> integrator.deserializeQueryArgument(getType(), v))
+                    .orElse(null);
+            return completedFuture(deserializedValue);
         }
 
         if (element.isAnnotationPresent(Header.class)) {
             final var headerAnnotation = element.getAnnotation(Header.class);
-
             final Optional<String> serializedValue = request.getHeaderEntry(headerAnnotation.value());
             if (serializedValue.isEmpty() && !isOptional) return failedFuture(new BadRequestException());
-            return completedFuture(integrator.deserializeHeaderArgument(getType(), serializedValue.orElse(null)));
+            final var deserializedValue = serializedValue.map(v -> integrator.deserializeHeaderArgument(getType(), v))
+                    .orElse(null);
+            return completedFuture(deserializedValue);
         }
 
         if (element.isAnnotationPresent(Path.class)) {
-            final var pathAnnotation = element.getAnnotation(Path.class);
-            if (isOptional) return failedFuture(new UnsupportedOperationException());
-            final var serializedValue = route.getVariableElementValue(request.getPath(), pathAnnotation.value());
-            return completedFuture(integrator.deserializePathArgument(getType(), serializedValue));
+            final var pathParam = element.getAnnotation(Path.class).value();
+            final var pathArg = route.getVariableElementValue(request.getPath(), pathParam);
+            if (pathArg.isEmpty() && !isOptional) return failedFuture(new BadRequestException());
+            final var serializedPathArg = pathArg.map(a -> integrator.deserializePathArgument(getType(), a))
+                    .orElse(null);
+            return completedFuture(serializedPathArg);
         }
 
         if (element.isAnnotationPresent(RequestBody.class)) {
             if (request.getBodyPublisher().isEmpty() && !isOptional) return failedFuture(new UnsupportedOperationException());
             final var contentType = request.getContentType();
             if (contentType.isEmpty()) return failedFuture(new BadRequestException());
-            return integrator.deserializeRequestBody(contentType.get(), getType(), request.getBodyPublisher().orElse(null));
+            return request.getBodyPublisher().map(p -> integrator.deserializeRequestBody(contentType.get(), getType(), p))
+                    .orElse(CompletableFuture.completedFuture(null));
         }
 
         throw new IllegalArgumentException();
