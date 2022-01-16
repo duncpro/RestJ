@@ -15,16 +15,12 @@ import static java.util.Objects.requireNonNull;
 public class SmokeTestMain {
     public static void main(String[] args) {
         final var serverConfig = Undertow.builder()
+                .setIoThreads(1)
+                .setWorkerThreads(0)
                 .addHttpListener(8080, "localhost");
         final var injector = Guice.createInjector(new RestJUndertowModule(serverConfig),
                 new SmokeTestModule(), new JavaHttpIntegratorModule());
 
-//        new Timer().schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                injector.getInstance(Undertow.class).stop();
-//            }
-//        }, 1000 * 10);
         injector.getInstance(Undertow.class).start();
     }
 }

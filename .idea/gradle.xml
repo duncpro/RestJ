@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/restj-core" />
+            <option value="$PROJECT_DIR$/restj-sun-http-server" />
             <option value="$PROJECT_DIR$/restj-undertow" />
           </set>
         </option>
