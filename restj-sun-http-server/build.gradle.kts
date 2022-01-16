@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    api("com.google.inject:guice:5.0.1")
     api(project(":restj-core"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -32,5 +33,3 @@ publishing {
         }
     }
 }
-
-version = "1.0-SNAPSHOT"

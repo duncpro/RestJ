@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    api("com.google.inject:guice:5.0.1")
     api("com.duncpro:jroute:1.0-SNAPSHOT-4")
     api("com.google.inject:guice:5.0.1")
     compileOnly("com.google.auto.value:auto-value-annotations:1.9")
@@ -37,6 +38,3 @@ publishing {
         }
     }
 }
-
-version = "1.0-SNAPSHOT"
-

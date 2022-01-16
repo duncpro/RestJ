@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    api("com.google.inject:guice:5.0.1")
     api("com.amazonaws:aws-lambda-java-events:3.11.0")
     api(project(":restj-core"))
     api("com.amazonaws:aws-lambda-java-core:1.2.1")
@@ -34,5 +35,3 @@ publishing {
         }
     }
 }
-
-version = "1.0"

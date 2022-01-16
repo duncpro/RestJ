@@ -1,4 +1,4 @@
-rootProject.name = "RestJ"
+rootProject.name = "restj"
 include("restj-core")
 include("restj-undertow")
 include("restj-sun-http-server")

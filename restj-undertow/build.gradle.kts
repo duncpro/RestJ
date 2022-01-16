@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    api("com.google.inject:guice:5.0.1")
     api(project(":restj-core"))
     api("io.undertow:undertow-core:2.1.0.Final")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
@@ -24,5 +25,3 @@ publishing {
         }
     }
 }
-
-version = "1.0-SNAPSHOT"
