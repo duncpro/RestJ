@@ -16,6 +16,7 @@ public class SmokeTestApi {
     @HttpResource(route = "ping")
     @HttpEndpoint(HttpMethod.POST)
     public String handleRequest() {
+//        throw new RuntimeException();
         System.out.println("pong");
         return "pong";
     }

@@ -6,9 +6,11 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.GracefulShutdownHandler;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
     private Sender sender;
@@ -37,7 +39,7 @@ public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
         exchange.endExchange();
 
         if (throwable instanceof RuntimeException) {
-            server.stop();
+            runAsync(server::stop);
         }
     }
 

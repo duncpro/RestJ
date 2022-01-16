@@ -1,6 +1,6 @@
 com/duncpro/restj/RestJUndertowHttpHandler.java
  com.duncpro.restj.RestJUndertowHttpHandler
-com/duncpro/restj/UndertowSenderSubscriber.java
- com.duncpro.restj.UndertowSenderSubscriber
 com/duncpro/restj/RestJUndertowModule.java
  com.duncpro.restj.RestJUndertowModule
+com/duncpro/restj/UndertowSenderSubscriber.java
+ com.duncpro.restj.UndertowSenderSubscriber

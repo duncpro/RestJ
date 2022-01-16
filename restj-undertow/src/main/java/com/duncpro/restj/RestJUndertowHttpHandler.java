@@ -22,6 +22,7 @@ import java.util.concurrent.SubmissionPublisher;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class RestJUndertowHttpHandler implements HttpHandler {
     private final HttpRestApi restApi;
@@ -77,7 +78,7 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                 .whenComplete((response, error) -> {
                     if (error == null) return;
                     error.printStackTrace();
-                    server.get().stop();
+                    runAsync(() -> server.get().stop());
                 });
     }
 }
