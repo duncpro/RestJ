@@ -3,10 +3,6 @@ plugins {
     `maven-publish`
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":restj-core"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
@@ -22,8 +18,19 @@ java.targetCompatibility = JavaVersion.VERSION_11
 
 publishing {
     publications {
+        repositories {
+            maven {
+                url = uri("https://duncpro-personal-618824625980.d.codeartifact.us-east-1.amazonaws.com/maven/duncpro-personal/")
+                credentials {
+                    username = "aws"
+                    password = System.getenv("CODEARTIFACT_AUTH_TOKEN")
+                }
+            }
+        }
         create<MavenPublication>("maven") {
             from(components["java"])
         }
     }
 }
+
+version = "1.0-SNAPSHOT"

@@ -1,6 +1,4 @@
 # RestJ
-[![](https://jitpack.io/v/com.duncpro/restj.svg)](https://jitpack.io/#com.duncpro/restj)
-
 Object-oriented, asynchronous, serverside REST framework, leveraging Java 11, Guice, and CompletableFuture.
 
 Not an HTTP server implementation. An underlying server library, such as Netty, must be used in addition to RestJ.
