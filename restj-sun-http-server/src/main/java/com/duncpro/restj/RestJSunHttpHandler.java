@@ -87,7 +87,7 @@ public class RestJSunHttpHandler implements HttpHandler {
             return;
         }
 
-        try (exchange) {
+        try {
             if (response.getBody().isPresent()) {
                 final var responseSubscriber = new OutputStreamSubscriber(exchange.getResponseBody());
                 response.getBody().get().subscribe(responseSubscriber);
@@ -102,6 +102,8 @@ public class RestJSunHttpHandler implements HttpHandler {
                     }
                 }
             }
+        } finally {
+            exchange.close();
         }
     }
 }
