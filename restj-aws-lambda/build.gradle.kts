@@ -3,8 +3,6 @@ plugins {
     `maven-publish`
 }
 
-version = "1.0-SNAPSHOT"
-
 dependencies {
     api("com.amazonaws:aws-lambda-java-events:3.11.0")
     api(project(":restj-core"))
@@ -17,6 +15,7 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
+version = "1.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
 
