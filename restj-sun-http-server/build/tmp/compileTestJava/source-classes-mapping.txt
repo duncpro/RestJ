@@ -1,7 +1,0 @@
-com/duncpro/restj/SmokeTestModule.java
- com.duncpro.restj.SmokeTestModule
-com/duncpro/restj/SmokeTestApi.java
- com.duncpro.restj.SmokeTestApi
-com/duncpro/restj/SmokeTestMain.java
- com.duncpro.restj.SmokeTestMain
- com.duncpro.restj.SmokeTestMain$1
