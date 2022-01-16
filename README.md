@@ -1,5 +1,5 @@
 # RestJ
-Object-oriented, asynchronous, serverside REST framework, leveraging Java, Guice, and CompletableFuture.
+Object-oriented, asynchronous, serverside REST framework, leveraging Java 11, Guice, and CompletableFuture.
 
 Not an HTTP server implementation. An underlying server library, such as Netty, must be used in addition to RestJ.
 This library is designed as a lightweight alternative to JAX-RS and its implementations, supporting both async and blocking

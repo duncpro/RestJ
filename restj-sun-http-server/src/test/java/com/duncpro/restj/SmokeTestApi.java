@@ -18,9 +18,8 @@ public class SmokeTestApi {
     @HttpEndpoint(HttpMethod.POST)
     @HttpResource(route = "/greeting")
     public CompletableFuture<String> handleGreetingRequest(HttpRequest request) {
-//       return request.getBody().orElseThrow(BadRequestException::new)
-//               .thenApply(String::new)
-//               .thenApply(name -> "Hello " + name);
-        throw new RuntimeException();
+       return request.getBody().orElseThrow(BadRequestException::new)
+               .thenApply(String::new)
+               .thenApply(name -> "Hello " + name);
     }
 }
