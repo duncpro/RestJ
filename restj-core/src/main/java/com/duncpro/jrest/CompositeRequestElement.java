@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 
 /**
- * This interface can be optionally be implemented by <i>Composite Request Elements</i>.
+ * This interface can optionally be implemented by <i>Composite Request Elements</i>.
  * It provides an async-injection-safe alternative to {@code @PostConstruct}.
  * This class should be used as a replacement for {@code @PostConstruct} when initialization
  * functionality is needed within a <i>Composite Request Element</i>. Either, all, or none, of the methods

@@ -169,3 +169,7 @@ Alternatively, `restj-undertow` can be used alongside a blocking worker thread p
 
 For larger scale applications with thousands of simultaneous requests using an async implementation 
 like `restj-undertow` might be preferred. 
+
+An implementation for AWS Lambda with API Gateway Proxy integration is also provided in `restj-aws-lambda`.
+Therefore, an application developed using RestJ can be tested completely locally, and then deployed as a serverless
+service on AWS.
