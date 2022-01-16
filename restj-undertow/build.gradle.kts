@@ -3,8 +3,6 @@ plugins {
     `maven-publish`
 }
 
-version = "1.0-SNAPSHOT"
-
 dependencies {
     api(project(":restj-core"))
     api("io.undertow:undertow-core:2.1.0.Final")
