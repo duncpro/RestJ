@@ -163,7 +163,7 @@ An async handler method which completes with some exception other than `RequestE
 in an uncaught `CompletionException` being thrown from `HttpRestApi#processRequest`.
 
 ### Web Sockets
-Extremely support for Web Sockets is included, however the API is incomplete and will likely be expanded in the future.
+Barebones support for Web Sockets is included, however the API is incomplete and will likely be expanded in the future.
 Only the `restj-undertow` implementation supports Web Sockets.
 
 Sending messages to web socket clients is supported, but receiving data is not. Any received data is ignored.
