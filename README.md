@@ -185,7 +185,9 @@ class WeatherEventsApi {
     }
 
     @WebSocketEventReceiver(WebSocketEventType.OPENED)
-    void onSubscribe(WebSocketRawClient client, @Query("since") ZonedDateTime lastConnectedAt, @Header("Authorization") String authToken) {
+    void onSubscribe(WebSocketRawClient client,
+                     @Query("since") ZonedDateTime lastConnectedAt,
+                     @Header("Authorization") String authToken) {
         // TODO Start sending this client weather events
     }
 
