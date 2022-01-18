@@ -23,7 +23,6 @@ public interface HttpIntegrator {
     <T> CompletableFuture<T> deserializeRequestBody(String fromContentType, TypeLiteral<T> intoJavaType, Flow.Publisher<byte[]> serializedForm);
 
     Set<String> getProducableContentTypes();
-
     Set<String> getConsumableContentTypes();
 
     class SerializedResponseBody {

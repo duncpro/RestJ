@@ -3,7 +3,7 @@ package com.duncpro.restj;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.duncpro.jrest.HttpRequest;
-import com.duncpro.jrest.HttpRestApi;
+import com.duncpro.jrest.HttpApi;
 import com.duncpro.jrest.util.ByteArrayPublisher;
 import com.duncpro.jrest.util.ConsolidatingByteArraySubscriber;
 import com.duncpro.jroute.HttpMethod;
@@ -17,10 +17,10 @@ import java.util.concurrent.Flow;
 import static java.util.Objects.requireNonNull;
 
 public class ApiGatewayHttpRestApi {
-    private final HttpRestApi restApi;
+    private final HttpApi restApi;
 
     @Inject
-    public ApiGatewayHttpRestApi(HttpRestApi restApi) {
+    public ApiGatewayHttpRestApi(HttpApi restApi) {
         this.restApi = requireNonNull(restApi);
     }
 

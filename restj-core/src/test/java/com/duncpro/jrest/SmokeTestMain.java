@@ -20,7 +20,7 @@ public class SmokeTestMain {
         // The HttpRestApi class should be notified of any inbound requests.
         // Given an inbound request it will produce an outbound response using the declarative HTTP endpoints
         // which exist within the Guice injector.
-        final var restApi = injector.getInstance(HttpRestApi.class);
+        final var restApi = injector.getInstance(HttpApi.class);
 
         // Create a request.
         // In practice this process will be handled by whatever http-sever implementation is being used.

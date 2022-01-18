@@ -18,7 +18,7 @@ public class HttpRestApiEndpointBinder {
 
     public void bind(Class<?> restResource) {
         Arrays.stream(restResource.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(HttpEndpoint.class))
+                .filter(DeclarativeHttpEndpoint::isHandlerMethod)
                 .map(method -> new DeclarativeHttpEndpoint(method, injector))
                 .forEach(endpoint ->  endpoints.addBinding().toInstance(endpoint));
     }

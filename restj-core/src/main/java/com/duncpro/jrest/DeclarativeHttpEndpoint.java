@@ -3,13 +3,17 @@ package com.duncpro.jrest;
 import com.duncpro.jrest.exceptional.ContentNegotiationException;
 import com.duncpro.jrest.exceptional.RequestException;
 import com.duncpro.jrest.integration.HttpIntegrator;
+import com.duncpro.jrest.util.FutureUtils;
 import com.duncpro.jroute.HttpMethod;
 import com.google.inject.BindingAnnotation;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Module;
 
+import javax.annotation.Nullable;
 import javax.inject.Provider;
 import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -67,8 +71,44 @@ class DeclarativeHttpEndpoint {
         return response;
     }
 
+    CompletableFuture<Void> processWebSocketClosed(WebSocketRawClient wsClient) {
+        // Check for internal issues within the RestJ library. Should never happen.
+        if (getReceiverType() != ReceiverType.WEB_SOCKET) throw new IllegalStateException();
+        if (getWebSocketEventType() != WebSocketEventType.CLOSED) throw new IllegalStateException();
+
+        return prepareInvocation(null, wsClient)
+                .thenCompose(this::invokeHandlerMethod)
+                .thenApply(returnValue -> {
+                    if (returnValue != null) throw new IllegalStateException();
+                    return null;
+                });
+    }
+
+    CompletableFuture<Void> processWebSocketOpened(HttpRequest request, WebSocketRawClient wsClient) {
+        // Check for internal issues within the RestJ library. Should never happen.
+        if (getReceiverType() != ReceiverType.WEB_SOCKET) throw new IllegalStateException();
+        if (getWebSocketEventType() != WebSocketEventType.OPENED) throw new IllegalStateException();
+
+        return prepareInvocation(request, null)
+                .thenCompose(this::invokeHandlerMethod)
+                .handle((returnValue, error) -> {
+                    if (returnValue != null) {
+                        final var invalidHandlerException = new IllegalStateException();
+                        if (error != null) invalidHandlerException.addSuppressed(error);
+                        throw invalidHandlerException;
+                    }
+
+                    if (error != null) {
+                        throw FutureUtils.wrapException(error);
+                    }
+
+                    return null;
+                });
+    }
+
     CompletableFuture<SerializedHttpResponse> processRequest(HttpRequest request) {
-        return invokeHandlerMethod(request)
+        return prepareInvocation(request, null)
+                .thenCompose(this::invokeHandlerMethod)
                 .handle(this::mapInvocationResultToResponse)
                 .thenApply(response -> getHttpIntegrator().serializeHttpResponse(response, request.getAcceptableResponseTypes()))
                 .handle(this::handleContentNegotiationFailure);
@@ -84,11 +124,16 @@ class DeclarativeHttpEndpoint {
         }
     }
 
-    private CompletableFuture<HandlerInvocationContext> prepareInvocation(HttpRequest request) {
-        // An injector which is exclusive to this request.
+    private CompletableFuture<HandlerInvocationContext> prepareInvocation(@Nullable HttpRequest request, @Nullable WebSocketRawClient wsClient) {
+        // Create an injector which is exclusive to this request.
         // Contains request-specific bindings such as serialized request bodies and http request elements.
         // This injector is used to implement the composite request element functionality.
-        final var requestInjector = applicationInjector.get().createChildInjector(new HttpRequestModule(request, getRoute()));
+        final Set<Module> modules = new HashSet<>();
+        if (wsClient != null) modules.add(new WebSocketEventModule(wsClient));
+        if (request != null) modules.add(new HttpRequestModule(request));
+        modules.add(new HttpEndpointModule(getRoute()));
+        final var requestInjector = applicationInjector.get()
+                .createChildInjector(modules.toArray(Module[]::new));
 
         final var declaringClassInstance = requestInjector.getInstance(method.getDeclaringClass());
 
@@ -120,11 +165,6 @@ class DeclarativeHttpEndpoint {
         return CompletableFuture.allOf(futureArguments.toArray(CompletableFuture[]::new))
                 .thenApply($ -> futureArguments.stream().map(CompletableFuture::join).collect(Collectors.toList()))
                 .thenApply(arguments -> new HandlerInvocationContext(declaringClassInstance, arguments));
-    }
-
-    private CompletableFuture<Object> invokeHandlerMethod(HttpRequest request) {
-        return prepareInvocation(request)
-                .thenCompose(this::invokeHandlerMethod);
     }
 
     /**
@@ -197,6 +237,33 @@ class DeclarativeHttpEndpoint {
     }
 
     HttpMethod getHttpMethod() {
-        return method.getAnnotation(HttpEndpoint.class).value();
+        if (method.isAnnotationPresent(HttpEndpoint.class) && method.getDeclaringClass().isAnnotationPresent(HttpEndpoint.class))
+            throw new IllegalStateException();
+
+        final var annotation = Optional.ofNullable(method.getAnnotation(HttpEndpoint.class))
+                .or(() -> Optional.ofNullable(method.getDeclaringClass().getAnnotation(HttpEndpoint.class)))
+                .orElseThrow(IllegalStateException::new);
+
+        return annotation.value();
+    }
+
+    ReceiverType getReceiverType() {
+        if (method.isAnnotationPresent(RequestReceiver.class)) return ReceiverType.REST_REQUEST;
+        if (method.isAnnotationPresent(WebSocketEventReceiver.class)) return ReceiverType.WEB_SOCKET;
+        return ReceiverType.REST_REQUEST;
+    }
+
+    WebSocketEventType getWebSocketEventType() {
+        if (!method.isAnnotationPresent(WebSocketEventReceiver.class)) throw new IllegalStateException();
+        return method.getAnnotation(WebSocketEventReceiver.class).value();
+    }
+
+    private static final Set<Class<? extends Annotation>> markerAnnotations = Set.of(HttpEndpoint.class, RequestReceiver.class,
+            WebSocketEventReceiver.class);
+
+    static boolean isHandlerMethod(Method method) {
+        return Arrays.stream(method.getDeclaredAnnotations())
+                .map(Annotation::annotationType)
+                .anyMatch(markerAnnotations::contains);
     }
 }

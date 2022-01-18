@@ -1,7 +1,7 @@
 package com.duncpro.restj;
 
 import com.duncpro.jrest.HttpRequest;
-import com.duncpro.jrest.HttpRestApi;
+import com.duncpro.jrest.HttpApi;
 import com.duncpro.jrest.SerializedHttpResponse;
 import com.duncpro.jrest.util.URLUtils;
 import com.duncpro.jroute.HttpMethod;
@@ -10,23 +10,20 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import javax.inject.Inject;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.SubmissionPublisher;
-import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
 public class RestJSunHttpHandler implements HttpHandler {
-    private final HttpRestApi restApi;
+    private final HttpApi restApi;
     private final HttpServer server;
 
-    public RestJSunHttpHandler(HttpRestApi restApi, HttpServer server) {
+    public RestJSunHttpHandler(HttpApi restApi, HttpServer server) {
         this.restApi = requireNonNull(restApi);
         this.server = requireNonNull(server);
     }

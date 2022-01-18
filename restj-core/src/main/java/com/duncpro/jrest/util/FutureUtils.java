@@ -10,4 +10,9 @@ public class FutureUtils {
 
         return e;
     }
+
+    public static CompletionException wrapException(Throwable e) {
+        if (e instanceof CompletionException) return (CompletionException) e;
+        return new CompletionException(e);
+    }
 }

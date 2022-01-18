@@ -7,17 +7,13 @@ import static java.util.Objects.requireNonNull;
 
 public class HttpRequestModule extends AbstractModule {
     private final HttpRequest request;
-    private final ParameterizableRoute route;
 
-    public HttpRequestModule(HttpRequest request, ParameterizableRoute route) {
+    public HttpRequestModule(HttpRequest request) {
         this.request = requireNonNull(request);
-        this.route = requireNonNull(route);
     }
 
     @Override
     public void configure() {
-        bind(AsyncInjectionOrchestrator.class).in(Singleton.class);
-        bind(ParameterizableRoute.class).toInstance(route);
         bind(HttpRequest.class).toInstance(request);
     }
 }

@@ -162,6 +162,37 @@ to generate an exception HTTP response.
 An async handler method which completes with some exception other than `RequestException` will result
 in an uncaught `CompletionException` being thrown from `HttpRestApi#processRequest`.
 
+### Web Sockets
+Extremely support for Web Sockets is included, however the API is incomplete and will likely be expanded in the future.
+Only the `restj-undertow` implementation supports Web Sockets.
+
+Sending messages to web socket clients is supported, but receiving data is not. Any received data is ignored.
+Consider having the client make a standard HTTP request instead.
+
+```java
+import java.net.http.HttpRequest;
+import java.time.ZonedDateTime;
+
+@HttpEndpoint(HttpMethod.GET)
+@HttpResource(route = "/weather")
+class WeatherEventsApi {
+    @RequestReceiver
+    CompletableFuture<Void> handlePollingClients(@Query("since") ZonedDateTime lastPoll) {
+        return failedFuture(new BadRequestException("Weather event polling is not yet implemented."));
+    }
+
+    @WebSocketEventReceiver(WebSocketEventType.OPENED)
+    void onSubscribe(WebSocketRawClient client, @Header("Authorization") String authToken) {
+        // TODO Start sending this client weather events
+    }
+
+    @WebSocketEventReceiver(WebSocketEventType.CLOSED)
+    void onUnsubscribe(WebSocketRawClient client) {
+        // TODO Stop sending this client weather events
+    }
+}
+```
+
 ### Choosing an Implementation
 For smaller scale applications which rely on blocking technologies such as JDBC, `restj-sun-http-server`
 can be used. It uses Sun's HTTP server library which is included within most JDK distributions.

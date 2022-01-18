@@ -1,6 +1,6 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpRestApi;
+import com.duncpro.jrest.HttpApi;
 import com.duncpro.jrest.HttpRestApiModule;
 import com.duncpro.jrest.integration.JavaHttpIntegratorModule;
 import com.google.inject.Guice;
@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 public class SmokeTestMain {
     public static void main(String[] args) throws IOException {
         final var injector = Guice.createInjector(new SmokeTestModule(), new JavaHttpIntegratorModule(), new HttpRestApiModule());
-        final var restApi = injector.getInstance(HttpRestApi.class);
+        final var restApi = injector.getInstance(HttpApi.class);
         final var server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
         final var threadPool = Executors.newCachedThreadPool();
         server.setExecutor(threadPool);

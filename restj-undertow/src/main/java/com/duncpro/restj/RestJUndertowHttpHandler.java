@@ -1,36 +1,34 @@
 package com.duncpro.restj;
 
 import com.duncpro.jrest.HttpRequest;
-import com.duncpro.jrest.HttpRestApi;
+import com.duncpro.jrest.HttpApi;
 import com.duncpro.jroute.HttpMethod;
 import com.duncpro.jroute.Path;
+import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.io.Receiver;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.protocol.framed.AbstractFramedChannel;
 import io.undertow.util.HttpString;
+import org.xnio.ChannelListener;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.Flow;
+import java.util.*;
 import java.util.concurrent.SubmissionPublisher;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class RestJUndertowHttpHandler implements HttpHandler {
-    private final HttpRestApi restApi;
+    private final HttpApi httpApi;
     private final Provider<Undertow> server;
 
     @Inject
-    public RestJUndertowHttpHandler(HttpRestApi restApi, Provider<Undertow> server) {
-        this.restApi = restApi;
+    public RestJUndertowHttpHandler(HttpApi restApi, Provider<Undertow> server) {
+        this.httpApi = restApi;
         this.server = server;
     }
 
@@ -62,7 +60,26 @@ public class RestJUndertowHttpHandler implements HttpHandler {
             request = new HttpRequest(query, method, path, headers, bodyPublisher);
         }
 
-        restApi.processRequest(request)
+        if (exchange.isUpgrade()) {
+            exchange.dispatch(Handlers.websocket((socketExchange, channel) -> {
+                channel.setAttribute("sessionId", UUID.randomUUID());
+                final var wsClient = new UndertowRawWebSocketClient(request.getHttpMethod(), request.getPath(), channel);
+                channel.getCloseSetter().set((ChannelListener<AbstractFramedChannel>) $ -> {
+                    httpApi.handleWebSocketClosed(wsClient)
+                            .whenComplete(this::catchErrors);
+                });
+                httpApi.handleWebSocketOpened(request, wsClient)
+                        .thenAccept(endpointExists -> {
+                            if (endpointExists) return;
+                            wsClient.drop(404, "This endpoint does not support web socket protocol.")
+                                    .whenComplete(($, error) -> error.printStackTrace());
+                        })
+                        .whenComplete(this::catchErrors);
+            }));
+            return;
+        }
+
+        httpApi.processRequest(request)
                 .thenAccept(response -> {
                     exchange.setStatusCode(response.getStatusCode());
                     final var undertowResponseHeaders = exchange.getResponseHeaders();
@@ -75,10 +92,12 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                     }
                     body.get().subscribe(new UndertowSenderSubscriber(server.get(), exchange));
                 })
-                .whenComplete((response, error) -> {
-                    if (error == null) return;
-                    error.printStackTrace();
-                    runAsync(() -> server.get().stop());
-                });
+                .whenComplete(this::catchErrors);
+    }
+
+    private <T> void catchErrors(T returnValue, Throwable error) {
+        if (error == null) return;
+        error.printStackTrace();
+        runAsync(() -> server.get().stop());
     }
 }
