@@ -176,6 +176,10 @@ import java.time.ZonedDateTime;
 @HttpEndpoint(HttpMethod.GET)
 @HttpResource(route = "/weather")
 class WeatherEventsApi {
+    // A @RequestReceiver method handles standard HTTP requests made to the endpoint.
+    // That is, requests which do not support the web socket protocol.
+    // Therefore, servers can implement support for older clients quite easily alongside
+    // more modern web socket clients. The opposite of a @RequestReceiver is a @WebSocketEventReceiver.
     @RequestReceiver
     CompletableFuture<Void> handlePollingClients(@Query("since") ZonedDateTime lastPoll) {
         return failedFuture(new BadRequestException("Weather event polling is not yet implemented."));
