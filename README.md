@@ -152,15 +152,14 @@ the need to inject a provider for a composite request element.
 
 ### Exceptions
 Any exception thrown within an async handler method (that is, a handler method which returns `CompletableFuture`)
-will not be caught. Async handler methods should return failing `CompletableFuture` instead. 
-
+will not be caught. Async handler methods should return failing `CompletableFuture` instead.
 
 Any exception thrown within a sync handler method (that is, a handler method which does not return `CompletableFuture`),
 will not be caught unless it is an instance of `RequestException` in which case it will be used 
 to generate an exception HTTP response.
 
 An async handler method which completes with some exception other than `RequestException` will result
-in an uncaught `CompletionException` being thrown from `HttpRestApi#processRequest`.
+in an exceptionally completed (`CompletionException`) future being returned from `HttpRestApi#processRequest`.
 
 ### Web Sockets
 Barebones support for Web Sockets is included, however the API is incomplete and will likely be expanded in the future.
