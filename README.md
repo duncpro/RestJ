@@ -170,6 +170,8 @@ Sending messages to web socket clients is supported, but receiving data is not. 
 Consider having the client make a standard HTTP request instead.
 
 ```java
+import java.time.ZonedDateTime;
+
 @HttpEndpoint(HttpMethod.GET)
 @HttpResource(route = "/weather")
 class WeatherEventsApi {
@@ -183,7 +185,7 @@ class WeatherEventsApi {
     }
 
     @WebSocketEventReceiver(WebSocketEventType.OPENED)
-    void onSubscribe(WebSocketRawClient client, @Header("Authorization") String authToken) {
+    void onSubscribe(WebSocketRawClient client, @Query("since") ZonedDateTime lastConnectedAt, @Header("Authorization") String authToken) {
         // TODO Start sending this client weather events
     }
 
