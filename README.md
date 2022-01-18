@@ -181,18 +181,23 @@ class WeatherEventsApi {
     // more modern web socket clients. The opposite of a @RequestReceiver is a @WebSocketEventReceiver.
     @RequestReceiver
     CompletableFuture<Void> handlePollingClients(@Query("since") ZonedDateTime lastPoll) {
-        return failedFuture(new BadRequestException("Weather event polling is not yet implemented."));
+        // TODO Fetch elapsed events from the database
     }
 
     @WebSocketEventReceiver(WebSocketEventType.OPENED)
-    void onSubscribe(WebSocketRawClient client,
+    CompletableFuture<Void> onSubscribe(WebSocketRawClient client,
                      @Query("since") ZonedDateTime lastConnectedAt,
                      @Header("Authorization") String authToken) {
         // TODO Start sending this client weather events
+        // Return values other than CompletableFuture<Void> and void are not currently allowed.
+        // It's good practice to return CompletableFuture<Void> if possible and not just catch
+        // the error and print to console. 
+        // RestJ implementations will intentionally crash the server if a returned future throws an error
+        // or a handler method throws an error.
     }
 
     @WebSocketEventReceiver(WebSocketEventType.CLOSED)
-    void onUnsubscribe(WebSocketRawClient client) {
+    CompletableFuture<Void> onUnsubscribe(WebSocketRawClient client) {
         // TODO Stop sending this client weather events
     }
 }
