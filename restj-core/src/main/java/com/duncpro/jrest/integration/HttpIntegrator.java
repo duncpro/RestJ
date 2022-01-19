@@ -58,4 +58,6 @@ public interface HttpIntegrator {
 
         return new SerializedHttpResponse(completeHeader, serializedBodyContent, response.getStatusCode());
     }
+
+    byte[] serializeWebSocketMessage(Object deserializedForm);
 }

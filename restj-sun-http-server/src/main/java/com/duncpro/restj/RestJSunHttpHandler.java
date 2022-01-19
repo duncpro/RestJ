@@ -55,11 +55,12 @@ public class RestJSunHttpHandler implements HttpHandler {
         final var responseFuture = restApi.processRequest(request);
 
         if (requestHasBody) {
-            try (requestBodyPublisher; final var inputStream = exchange.getRequestBody()) {
+            try (final var inputStream = exchange.getRequestBody()) {
                 int data;
                 while ((data = inputStream.read()) != -1) {
                     requestBodyPublisher.submit(new byte[] { ((byte) data) });
                 }
+                requestBodyPublisher.close();
             } catch (IOException e) {
                 requestBodyPublisher.closeExceptionally(e);
             }

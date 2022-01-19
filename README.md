@@ -184,7 +184,7 @@ class WeatherEventsApi {
     }
 
     @WebSocketEventReceiver(WebSocketEventType.OPENED)
-    CompletableFuture<Void> onSubscribe(WebSocketRawClient client,
+    CompletableFuture<Void> onSubscribe(WebSocketClient client,
                      @Query("since") ZonedDateTime lastConnectedAt,
                      @Header("Authorization") String authToken) {
         // TODO Start sending this client weather events
@@ -195,6 +195,8 @@ class WeatherEventsApi {
         // or a handler method throws an error.
     }
 
+    // You are not required to declare a receiver for closure events, but in most cases, you
+    // probably will want to.
     @WebSocketEventReceiver(WebSocketEventType.CLOSED)
     CompletableFuture<Void> onUnsubscribe(WebSocketRawClient client) {
         // TODO Stop sending this client weather events

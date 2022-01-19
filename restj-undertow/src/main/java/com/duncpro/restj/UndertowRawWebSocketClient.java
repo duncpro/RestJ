@@ -15,11 +15,15 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Flow;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Objects.compare;
 import static java.util.Objects.requireNonNull;
 
 class UndertowRawWebSocketClient implements WebSocketRawClient {
+    private static final Logger logger = Logger.getLogger(UndertowRawWebSocketClient.class.getName());
+
     private final WebSocketChannel undertowChannel;
     private final HttpMethod endpointMethod;
     private final Path endpointPath;
@@ -32,6 +36,7 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
 
     @Override
     public CompletableFuture<Void> sendMessage(byte[] message) {
+        logger.log(Level.FINE, "Sending message...");
         final var sent = new CompletableFutureWebSocketCallback();
         WebSockets.sendBinary(ByteBuffer.wrap(message), undertowChannel, sent);
         return sent.getCompletion();
@@ -39,17 +44,15 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
 
     @Override
     public CompletableFuture<Void> drop(int reasonCode, String reason) {
+        logger.log(Level.FINE, "Closing web socket connection: " + reason + ", " + reason);
         final var sent = new CompletableFutureWebSocketCallback();
         WebSockets.sendClose(reasonCode, reason, undertowChannel, sent);
-        return sent.getCompletion().handle(($, error) -> {
+        return sent.getCompletion().whenComplete(($, $$) -> {
             try {
                 undertowChannel.close();
             } catch (IOException e) {
-                if (error == null) throw new CompletionException(e);
-                error.addSuppressed(e);
+               throw new CompletionException(e);
             }
-            if (error != null) throw FutureUtils.wrapException(error);
-            return null;
         });
     }
 

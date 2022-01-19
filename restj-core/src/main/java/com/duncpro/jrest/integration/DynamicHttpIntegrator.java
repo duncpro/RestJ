@@ -67,6 +67,11 @@ public class DynamicHttpIntegrator implements HttpIntegrator {
     }
 
     @Override
+    public byte[] serializeWebSocketMessage(Object deserializedForm) {
+        return injector.getInstance(WebSocketMessageSerializer.class).apply(deserializedForm);
+    }
+
+    @Override
     public <T> CompletableFuture<T> deserializeRequestBody(String fromContentType, TypeLiteral<T> intoJavaType, Flow.Publisher<byte[]> serializedForm) {
         final var key = Key.get(BodyDeserializer.class, ContentTypes.get(fromContentType));
 

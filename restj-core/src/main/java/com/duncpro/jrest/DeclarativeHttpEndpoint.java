@@ -34,8 +34,6 @@ class DeclarativeHttpEndpoint {
     DeclarativeHttpEndpoint(Method method, Provider<Injector> applicationInjector) {
         this.method = requireNonNull(method);
         this.applicationInjector = requireNonNull(applicationInjector);
-
-        if (!method.isAnnotationPresent(HttpEndpoint.class)) throw new IllegalArgumentException();
     }
 
     private HttpResponse mapInvocationResultToResponse(Object returnValue, Throwable e) {
@@ -89,7 +87,7 @@ class DeclarativeHttpEndpoint {
         if (getReceiverType() != ReceiverType.WEB_SOCKET) throw new IllegalStateException();
         if (getWebSocketEventType() != WebSocketEventType.OPENED) throw new IllegalStateException();
 
-        return prepareInvocation(request, null)
+        return prepareInvocation(request, wsClient)
                 .thenCompose(this::invokeHandlerMethod)
                 .handle((returnValue, error) -> {
                     if (returnValue != null) {

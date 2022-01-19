@@ -18,6 +18,8 @@ import javax.inject.Provider;
 
 import java.util.*;
 import java.util.concurrent.SubmissionPublisher;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.CompletableFuture.runAsync;
@@ -25,11 +27,13 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class RestJUndertowHttpHandler implements HttpHandler {
     private final HttpApi httpApi;
     private final Provider<Undertow> server;
+    private final Logger logger;
 
     @Inject
-    public RestJUndertowHttpHandler(HttpApi restApi, Provider<Undertow> server) {
-        this.httpApi = restApi;
-        this.server = server;
+    public RestJUndertowHttpHandler(HttpApi restApi, Provider<Undertow> server, Logger logger) {
+        this.httpApi = requireNonNull(restApi);
+        this.server = requireNonNull(server);
+        this.logger = requireNonNull(logger);
     }
 
     @Override
@@ -60,8 +64,15 @@ public class RestJUndertowHttpHandler implements HttpHandler {
             request = new HttpRequest(query, method, path, headers, bodyPublisher);
         }
 
-        if (exchange.isUpgrade()) {
-            exchange.dispatch(Handlers.websocket((socketExchange, channel) -> {
+        final var isUpgrade = request.getHeaderEntry("Upgrade").stream()
+                .map(entry -> entry.equals("websocket"))
+                .findFirst()
+                .orElse(false);
+
+        if (isUpgrade) {
+            logger.log(Level.FINE, "Received upgrade protocol request: " + request);
+            final var webSocketHandler = Handlers.websocket((socketExchange, channel) -> {
+                logger.log(Level.FINE, "Opened new web socket connection: " + request);
                 channel.setAttribute("sessionId", UUID.randomUUID());
                 final var wsClient = new UndertowRawWebSocketClient(request.getHttpMethod(), request.getPath(), channel);
                 channel.getCloseSetter().set((ChannelListener<AbstractFramedChannel>) $ -> {
@@ -75,7 +86,8 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                                     .whenComplete(($, error) -> error.printStackTrace());
                         })
                         .whenComplete(this::catchErrors);
-            }));
+            });
+            webSocketHandler.handleRequest(exchange);
             return;
         }
 
