@@ -5,6 +5,7 @@ import com.duncpro.jroute.HttpMethod;
 import com.duncpro.jroute.Path;
 
 import javax.inject.Inject;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 import static java.util.Objects.requireNonNull;
@@ -44,5 +45,16 @@ public class WebSocketClient implements WebSocketRawClient {
     @Override
     public Path getEndpointPath() {
         return rawClient.getEndpointPath();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof WebSocketRawClient)) return false;
+        return ((WebSocketRawClient) o).getSessionId().equals(this.getSessionId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getSessionId().hashCode();
     }
 }
