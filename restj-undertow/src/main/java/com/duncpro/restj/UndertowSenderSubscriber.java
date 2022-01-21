@@ -17,6 +17,8 @@ public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
     private final HttpServerExchange exchange;
     private final Undertow server;
 
+    private final CompletableFuture<?> completion = new CompletableFuture<>();
+
     UndertowSenderSubscriber(Undertow server, HttpServerExchange exchange) {
         this.server = requireNonNull(server);
         this.exchange = exchange;
@@ -37,15 +39,17 @@ public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
         throwable.printStackTrace();
         sender.close();
         exchange.endExchange();
-
-        if (throwable instanceof RuntimeException) {
-            runAsync(server::stop);
-        }
+        completion.completeExceptionally(throwable);
     }
 
     @Override
     public void onComplete() {
         exchange.getResponseSender().close();
         exchange.endExchange();
+        completion.complete(null);
+    }
+
+    public CompletableFuture<?> getCompletion() {
+        return completion;
     }
 }

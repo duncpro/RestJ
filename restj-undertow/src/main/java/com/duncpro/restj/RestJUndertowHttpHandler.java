@@ -17,11 +17,13 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class RestJUndertowHttpHandler implements HttpHandler {
@@ -77,7 +79,7 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                 final var wsClient = new UndertowRawWebSocketClient(request.getHttpMethod(), request.getPath(), channel);
                 channel.getCloseSetter().set((ChannelListener<AbstractFramedChannel>) $ -> {
                     httpApi.handleWebSocketClosed(wsClient)
-                            .whenComplete(this::catchErrors);
+                            .handle(this::catchErrors);
                 });
                 httpApi.handleWebSocketOpened(request, wsClient)
                         .thenAccept(endpointExists -> {
@@ -85,31 +87,41 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                             wsClient.drop(404, "This endpoint does not support web socket protocol.")
                                     .whenComplete(($, error) -> error.printStackTrace());
                         })
-                        .whenComplete(this::catchErrors);
+                        .handle(this::catchErrors);
             });
             webSocketHandler.handleRequest(exchange);
             return;
         }
 
-        httpApi.processRequest(request)
-                .thenAccept(response -> {
+        final var requestProcessed = httpApi.processRequest(request)
+                .thenCompose(response -> {
                     exchange.setStatusCode(response.getStatusCode());
                     final var undertowResponseHeaders = exchange.getResponseHeaders();
                     response.getHeader().forEach((key, values) -> undertowResponseHeaders
                             .addAll(new HttpString(key), values));
                     final var body = response.getBody();
-                    if (body.isEmpty()) {
-                        exchange.endExchange();
-                        return;
+                    CompletableFuture<?> bodySent = completedFuture(null);
+
+                    if (body.isPresent()) {
+                        final var subscriber = new UndertowSenderSubscriber(server.get(), exchange);
+                        body.get().subscribe(subscriber);
+                        bodySent = subscriber.getCompletion();
                     }
-                    body.get().subscribe(new UndertowSenderSubscriber(server.get(), exchange));
-                })
-                .whenComplete(this::catchErrors);
+
+                    return bodySent;
+                });
+
+        requestProcessed
+                .whenComplete(($, $$) -> exchange.getResponseSender().close())
+                .handle(this::catchErrors);
     }
 
-    private <T> void catchErrors(T returnValue, Throwable error) {
-        if (error == null) return;
-        error.printStackTrace();
-        runAsync(() -> server.get().stop());
+    private <T> CompletableFuture<Void> catchErrors(T returnValue, Throwable error) {
+        if (error != null) {
+            error.printStackTrace();
+            runAsync(() -> server.get().stop());
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 }
