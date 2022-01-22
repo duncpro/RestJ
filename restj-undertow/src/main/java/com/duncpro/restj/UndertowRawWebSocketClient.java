@@ -33,12 +33,19 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
         logger.log(Level.FINE, "Sending message...");
         final var sent = new CompletableFutureWebSocketCallback();
         WebSockets.sendBinary(ByteBuffer.wrap(message), undertowChannel, sent);
-        return sent.getCompletion();
+        return sent.getCompletion()
+                .whenComplete((r, error) -> {
+                    try {
+                        undertowChannel.close();
+                    } catch (IOException e) {
+                        throw new CompletionException(e);
+                    }
+                });
     }
 
     @Override
     public CompletableFuture<Void> drop(int reasonCode, String reason) {
-        logger.log(Level.FINE, "Closing web socket connection: " + reason + ", " + reason);
+        logger.log(Level.FINE, "Closing web socket connection for " + reason + " (" + reasonCode + ")");
         final var sent = new CompletableFutureWebSocketCallback();
         WebSockets.sendClose(reasonCode, reason, undertowChannel, sent);
         return sent.getCompletion().whenComplete(($, $$) -> {
@@ -46,6 +53,18 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
                 undertowChannel.close();
             } catch (IOException e) {
                throw new CompletionException(e);
+            }
+        });
+    }
+
+    private CompletableFuture<Void> drop() {
+        logger.log(Level.FINE, "Closing web socket connection for (no reason message or code)");
+        final var sent = new CompletableFutureWebSocketCallback();
+        return sent.getCompletion().whenComplete(($, $$) -> {
+            try {
+                undertowChannel.close();
+            } catch (IOException e) {
+                throw new CompletionException(e);
             }
         });
     }
