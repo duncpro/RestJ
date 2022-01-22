@@ -78,7 +78,7 @@ class DeclarativeHttpEndpoint {
         return prepareInvocation(null, wsClient)
                 .thenCompose(this::invokeHandlerMethod)
                 .thenApply(returnValue -> {
-                    if (returnValue != null) throw new IllegalStateException("WebSocketReceiver method returned some non-null value: " + returnValue);
+                    if (returnValue != null && !returnValue.getClass().getName().equals("kotlin.Unit")) throw new IllegalStateException("WebSocketReceiver method returned some non-null value: " + returnValue);
                     return null;
                 });
     }
@@ -90,17 +90,8 @@ class DeclarativeHttpEndpoint {
 
         return prepareInvocation(request, wsClient)
                 .thenCompose(this::invokeHandlerMethod)
-                .handle((returnValue, error) -> {
-                    if (returnValue != null) {
-                        final var invalidHandlerException = new IllegalStateException();
-                        if (error != null) invalidHandlerException.addSuppressed(error);
-                        throw invalidHandlerException;
-                    }
-
-                    if (error != null) {
-                        throw FutureUtils.wrapException(error);
-                    }
-
+                .thenApply(returnValue -> {
+                    if (returnValue != null && !returnValue.getClass().getName().equals("kotlin.Unit")) throw new IllegalStateException("WebSocketReceiver method returned some non-null value: " + returnValue);
                     return null;
                 });
     }

@@ -101,7 +101,7 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                     CompletableFuture<?> bodySent = completedFuture(null);
 
                     if (body.isPresent()) {
-                        final var subscriber = new UndertowSenderSubscriber(server.get(), exchange);
+                        final var subscriber = new UndertowSenderSubscriber(exchange);
                         body.get().subscribe(subscriber);
                         bodySent = subscriber.getCompletion();
                     }

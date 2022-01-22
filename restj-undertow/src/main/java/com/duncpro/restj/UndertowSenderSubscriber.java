@@ -15,13 +15,11 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
     private Sender sender;
     private final HttpServerExchange exchange;
-    private final Undertow server;
 
     private final CompletableFuture<?> completion = new CompletableFuture<>();
 
-    UndertowSenderSubscriber(Undertow server, HttpServerExchange exchange) {
-        this.server = requireNonNull(server);
-        this.exchange = exchange;
+    UndertowSenderSubscriber(HttpServerExchange exchange) {
+        this.exchange = requireNonNull(exchange);
     }
 
     @Override
@@ -36,16 +34,13 @@ public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
 
     @Override
     public void onError(Throwable throwable) {
-        throwable.printStackTrace();
         sender.close();
-        exchange.endExchange();
         completion.completeExceptionally(throwable);
     }
 
     @Override
     public void onComplete() {
-        exchange.getResponseSender().close();
-        exchange.endExchange();
+        sender.close();
         completion.complete(null);
     }
 
