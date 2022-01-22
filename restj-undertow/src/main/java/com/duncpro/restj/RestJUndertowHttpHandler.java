@@ -99,18 +99,18 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                             .addAll(new HttpString(key), values));
                     final var body = response.getBody();
                     CompletableFuture<?> bodySent = completedFuture(null);
+                    final var sender = exchange.getResponseSender();
 
                     if (body.isPresent()) {
-                        final var subscriber = new UndertowSenderSubscriber(exchange);
+                        final var subscriber = new UndertowSenderSubscriber(sender);
                         body.get().subscribe(subscriber);
                         bodySent = subscriber.getCompletion();
                     }
 
-                    return bodySent;
+                    return bodySent.whenComplete(($, $$) -> sender.close());
                 });
 
         requestProcessed
-                .whenComplete(($, $$) -> exchange.getResponseSender().close())
                 .handle(this::catchErrors);
     }
 

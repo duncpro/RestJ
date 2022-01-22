@@ -14,17 +14,16 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class UndertowSenderSubscriber implements Flow.Subscriber<byte[]> {
     private Sender sender;
-    private final HttpServerExchange exchange;
 
     private final CompletableFuture<?> completion = new CompletableFuture<>();
 
-    UndertowSenderSubscriber(HttpServerExchange exchange) {
-        this.exchange = requireNonNull(exchange);
+    UndertowSenderSubscriber(Sender sender) {
+        this.sender = requireNonNull(sender);
     }
 
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
-        this.sender = exchange.getResponseSender();
+
     }
 
     @Override
