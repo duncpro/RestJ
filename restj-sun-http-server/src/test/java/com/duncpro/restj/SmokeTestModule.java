@@ -1,6 +1,5 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpRestApiEndpointBinder;
 import com.google.inject.AbstractModule;
 
 import static java.util.Objects.requireNonNull;

@@ -1,7 +1,6 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpRestApiEndpointBinder;
-import com.duncpro.jrest.integration.WebSocketMessageSerializer;
+import com.duncpro.restj.integration.WebSocketMessageSerializer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 

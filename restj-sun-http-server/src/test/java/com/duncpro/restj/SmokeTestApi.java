@@ -1,7 +1,6 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.*;
-import com.duncpro.jrest.exceptional.BadRequestException;
+import com.duncpro.restj.exceptional.BadRequestException;
 import com.duncpro.jroute.HttpMethod;
 
 import java.util.concurrent.CompletableFuture;

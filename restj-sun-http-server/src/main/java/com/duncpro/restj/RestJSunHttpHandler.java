@@ -1,9 +1,6 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpRequest;
-import com.duncpro.jrest.HttpApi;
-import com.duncpro.jrest.SerializedHttpResponse;
-import com.duncpro.jrest.util.URLUtils;
+import com.duncpro.restj.util.URLUtils;
 import com.duncpro.jroute.HttpMethod;
 import com.duncpro.jroute.Path;
 import com.sun.net.httpserver.HttpExchange;

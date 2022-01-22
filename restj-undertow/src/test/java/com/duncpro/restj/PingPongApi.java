@@ -1,14 +1,11 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.*;
-import com.duncpro.jrest.util.FutureUtils;
 import com.duncpro.jroute.HttpMethod;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.duncpro.jrest.util.FutureUtils.catchIOExceptions;
-import static java.util.concurrent.CompletableFuture.completedFuture;
+import static com.duncpro.restj.util.FutureUtils.catchIOExceptions;
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
 
 @HttpResource(route = "/ping")

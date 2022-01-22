@@ -1,11 +1,7 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpEndpoint;
-import com.duncpro.jrest.WebSocketRawClient;
-import com.duncpro.jrest.util.FutureUtils;
 import com.duncpro.jroute.HttpMethod;
 import com.duncpro.jroute.Path;
-import io.undertow.websockets.core.WebSocketCallback;
 import io.undertow.websockets.core.WebSocketChannel;
 import io.undertow.websockets.core.WebSockets;
 
@@ -14,11 +10,9 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.Flow;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Objects.compare;
 import static java.util.Objects.requireNonNull;
 
 class UndertowRawWebSocketClient implements WebSocketRawClient {

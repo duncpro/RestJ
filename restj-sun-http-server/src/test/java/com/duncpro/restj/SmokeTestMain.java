@@ -1,8 +1,6 @@
 package com.duncpro.restj;
 
-import com.duncpro.jrest.HttpApi;
-import com.duncpro.jrest.HttpRestApiModule;
-import com.duncpro.jrest.integration.JavaHttpIntegratorModule;
+import com.duncpro.restj.integration.JavaHttpIntegratorModule;
 import com.google.inject.Guice;
 import com.sun.net.httpserver.HttpServer;
 
