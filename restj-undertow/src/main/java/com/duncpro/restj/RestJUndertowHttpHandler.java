@@ -91,6 +91,8 @@ public class RestJUndertowHttpHandler implements HttpHandler {
             return;
         }
 
+
+        exchange.dispatch();
         final var requestProcessed = httpApi.processRequest(request)
                 .thenCompose(response -> {
                     exchange.setStatusCode(response.getStatusCode());
@@ -98,7 +100,7 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                     response.getHeader().forEach((key, values) -> undertowResponseHeaders
                             .addAll(new HttpString(key), values));
                     final var body = response.getBody();
-                    CompletableFuture<?> bodySent = completedFuture(null);
+                    CompletableFuture<Void> bodySent = completedFuture(null);
                     final var sender = exchange.getResponseSender();
 
                     if (body.isPresent()) {
@@ -107,10 +109,13 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                         bodySent = subscriber.getCompletion();
                     }
 
-                    return bodySent.whenComplete(($, $$) -> sender.close());
+                    bodySent = bodySent.whenComplete(($, $$) -> sender.close());
+
+                    return bodySent;
                 });
 
         requestProcessed
+                .whenComplete(($, $$) -> exchange.unDispatch())
                 .handle(this::catchErrors);
     }
 

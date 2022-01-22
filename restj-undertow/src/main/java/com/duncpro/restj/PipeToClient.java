@@ -12,7 +12,7 @@ import static java.util.concurrent.CompletableFuture.runAsync;
 public class PipeToClient implements Flow.Subscriber<byte[]> {
     private final Sender sender;
 
-    private final CompletableFuture<?> completion = new CompletableFuture<>();
+    private final CompletableFuture<Void> completion = new CompletableFuture<>();
     private volatile Flow.Subscription subscription;
 
     PipeToClient(Sender sender) {
@@ -51,7 +51,7 @@ public class PipeToClient implements Flow.Subscriber<byte[]> {
         completion.complete(null);
     }
 
-    public CompletableFuture<?> getCompletion() {
+    public CompletableFuture<Void> getCompletion() {
         return completion;
     }
 }
