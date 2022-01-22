@@ -1,6 +1,6 @@
 allprojects {
     group = "com.duncpro.restj"
-    version = "1.0-SNAPSHOT-14"
+    version = "1.0-SNAPSHOT-15"
 
     repositories {
         mavenCentral()

@@ -6,6 +6,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class JavaHttpIntegratorModule extends AbstractModule {
     @Override
@@ -45,6 +46,7 @@ public class JavaHttpIntegratorModule extends AbstractModule {
 
         deserializers.bind(Boolean.class, Boolean::parseBoolean);
         deserializers.bind(String.class, String::toString);
+        deserializers.bind(UUID.class, UUID::fromString);
 
         bind(HttpIntegrator.class).to(DynamicHttpIntegrator.class);
     }
