@@ -35,6 +35,7 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
         WebSockets.sendBinary(ByteBuffer.wrap(message), undertowChannel, sent);
         return sent.getCompletion()
                 .whenComplete((r, error) -> {
+                    if (error == null) return;
                     try {
                         undertowChannel.close();
                     } catch (IOException e) {
@@ -56,19 +57,6 @@ class UndertowRawWebSocketClient implements WebSocketRawClient {
             }
         });
     }
-
-    private CompletableFuture<Void> drop() {
-        logger.log(Level.FINE, "Closing web socket connection for (no reason message or code)");
-        final var sent = new CompletableFutureWebSocketCallback();
-        return sent.getCompletion().whenComplete(($, $$) -> {
-            try {
-                undertowChannel.close();
-            } catch (IOException e) {
-                throw new CompletionException(e);
-            }
-        });
-    }
-
 
     @Override
     public String getSessionId() {
