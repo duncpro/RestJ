@@ -102,7 +102,7 @@ public class RestJUndertowHttpHandler implements HttpHandler {
                     final var sender = exchange.getResponseSender();
 
                     if (body.isPresent()) {
-                        final var subscriber = new UndertowSenderSubscriber(sender);
+                        final var subscriber = new PipeToClient(sender);
                         body.get().subscribe(subscriber);
                         bodySent = subscriber.getCompletion();
                     }
