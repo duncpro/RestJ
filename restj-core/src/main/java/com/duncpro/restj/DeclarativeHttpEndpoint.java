@@ -20,6 +20,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.duncpro.restj.util.FutureUtils.unwrapCompletionException;
@@ -77,7 +78,7 @@ class DeclarativeHttpEndpoint {
         return prepareInvocation(null, wsClient)
                 .thenCompose(this::invokeHandlerMethod)
                 .thenApply(returnValue -> {
-                    if (returnValue != null) throw new IllegalStateException();
+                    if (returnValue != null) throw new IllegalStateException("WebSocketReceiver method returned some non-null value: " + returnValue);
                     return null;
                 });
     }
